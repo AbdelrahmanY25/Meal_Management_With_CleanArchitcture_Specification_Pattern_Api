@@ -11,7 +11,7 @@ public class MealService(IRepository<Meal> mealRepository, IMealOptionsService m
 			.IsExistsAsync(m => m.Name == request.Name, cancellationToken: cancellationToken);
 
 		if (isMealExist)
-			return Result.Failure<MealResponse>(MealErrors.DoublicatedMealName);
+			return Result.Failure<MealResponse>(MealErrors.DuplicatedMealName);
 
 		var meal = request.Adapt<Meal>();
 
@@ -82,11 +82,11 @@ public class MealService(IRepository<Meal> mealRepository, IMealOptionsService m
 		if (!isMealExist)
 			return Result.Failure(MealErrors.MealNotFound);
 
-		bool isMealNameDoublicated = await _mealRepository
+		bool isMealNameDuplicated = await _mealRepository
 			.IsExistsAsync(m => m.Name == request.Name && m.Id != mealId, cancellationToken: cancellationToken);
 
-		if (isMealNameDoublicated)
-			return Result.Failure(MealErrors.DoublicatedMealName);
+		if (isMealNameDuplicated)
+			return Result.Failure(MealErrors.DuplicatedMealName);
 
 		return Result.Success();
 	}

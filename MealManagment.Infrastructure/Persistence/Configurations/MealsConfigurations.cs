@@ -18,5 +18,8 @@ internal class MealsConfigurations : IEntityTypeConfiguration<Meal>
 
 		builder.Property(m => m.Price)
 			.HasPrecision(5, 2);
+
+		builder.HasIndex(m => m.Name)
+			.IsUnique();
 	}
 }

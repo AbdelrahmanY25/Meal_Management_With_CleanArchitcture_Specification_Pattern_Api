@@ -19,7 +19,7 @@ internal sealed class MealResponseByIdWithOptionsAndItemsSpec : Specification<Me
 					i.Id,
 					i.Name,
 					i.Price,
-					i.IsPobular
+					i.IsPopular
 				)).ToList()
 			)).ToList()
 		);

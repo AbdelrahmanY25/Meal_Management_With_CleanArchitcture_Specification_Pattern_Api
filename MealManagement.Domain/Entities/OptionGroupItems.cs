@@ -7,7 +7,7 @@ public sealed class OptionGroupItems
 
 	public string Name { get; set; } = string.Empty;
 	public decimal Price { get; set; }
-	public bool IsPobular { get; set; } = false;
+	public bool IsPopular { get; set; } = false;
 
 	public MealOptionGroup OptionGroup { get; set; } = default!;
 }

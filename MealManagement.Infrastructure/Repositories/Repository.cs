@@ -64,6 +64,11 @@ internal sealed class Repository<TEntity>(ApplicationDbContext context) : IRepos
 		_dbSet.Update(entity);
 	}
 
+	public void UpdateRange(IEnumerable<TEntity> entities)
+	{
+		_dbSet.UpdateRange(entities);
+	}
+
 	public void Delete(TEntity entity)
 	{
 		_dbSet.Remove(entity);

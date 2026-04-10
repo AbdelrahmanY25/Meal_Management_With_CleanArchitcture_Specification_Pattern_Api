@@ -2,12 +2,9 @@
 
 internal class MealService(IRepository<Meal> mealRepository, IMealOptionsService mealOptionsService) : IMealService
 {
-	private readonly IRepository<Meal> _mealRepository = mealRepository;
-	private readonly IMealOptionsService _mealOptionsService = mealOptionsService;
-
 	public async Task<Result<MealResponse>> AddAsync(CreateMealRequest request, CancellationToken cancellationToken)
 	{
-		bool isMealExist = await _mealRepository
+		bool isMealExist = await mealRepository
 			.IsExistsAsync(m => m.Name == request.Name, cancellationToken: cancellationToken);
 
 		if (isMealExist)
@@ -15,8 +12,8 @@ internal class MealService(IRepository<Meal> mealRepository, IMealOptionsService
 
 		var meal = request.Adapt<Meal>();
 
-		Meal newMeal = await _mealRepository.AddAsync(meal, cancellationToken);
-		await _mealRepository.SaveChangesAsync(cancellationToken);
+		Meal newMeal = await mealRepository.AddAsync(meal, cancellationToken);
+		await mealRepository.SaveChangesAsync(cancellationToken);
 
 		return Result.Success(newMeal.Adapt<MealResponse>());
 	}
@@ -29,34 +26,31 @@ internal class MealService(IRepository<Meal> mealRepository, IMealOptionsService
 			return validationResult;
 
 		var spec = new MealByIdSpec(mealId);
-		var oldMeal = await _mealRepository.GetOneAsync(spec, cancellationToken);
 
-		if ((!request.HasOptionGroup && oldMeal!.HasOptionGroup) ||
-			(request.HasOptionGroup && !oldMeal!.HasOptionGroup) ||
-			(request.HasOptionGroup && oldMeal!.HasOptionGroup))
+		if (await mealRepository.GetOneWithSelectAsync(spec, cancellationToken) is not { } oldMeal)
+			return Result.Failure(MealErrors.MealNotFound);
+
+		if (request.HasOptionGroup || oldMeal.HasOptionGroup)
 		{
-			await _mealOptionsService
-				.UpdateAsync(oldMeal.HasOptionGroup, oldMeal.Id, oldMeal.MealOptionGroups, request.Options!, cancellationToken);
+			await mealOptionsService
+				.UpdateAsync(oldMeal.Id, (IReadOnlyList<MealOptionGroup>)oldMeal.MealOptionGroups, request.Options?.ToList() ?? [], cancellationToken);
 		}
 
-		request.Adapt(oldMeal!);
+		if (ThereAnyNewMealDataToUpdate(oldMeal, request))
+			request.Adapt(oldMeal);
 
-		await _mealRepository.SaveChangesAsync(cancellationToken);
+		mealRepository.Update(oldMeal);
+		await mealRepository.SaveChangesAsync(cancellationToken);
 
 		return Result.Success();
 	}	
 
 	public async Task<Result<MealResponse>> GetMeal(string mealId, CancellationToken cancellationToken)
 	{
-		bool isMealExist = await _mealRepository
-			.IsExistsAsync(m => m.Id == mealId, cancellationToken: cancellationToken);
-
-		if (!isMealExist)
-			return Result.Failure<MealResponse>(MealErrors.MealNotFound);
-
 		var spec = new MealResponseByIdWithOptionsAndItemsSpec(mealId);
 
-		var response = await _mealRepository.GetOneWithSelectAsync(spec, cancellationToken);
+		if(await mealRepository.GetOneWithSelectAsync(spec, cancellationToken) is not { } response)
+			return Result.Failure<MealResponse>(MealErrors.MealNotFound);
 
 		return Result.Success(response!);
 	}
@@ -65,7 +59,7 @@ internal class MealService(IRepository<Meal> mealRepository, IMealOptionsService
 	{
 		var spec = new AllMealsWithOptionsAdnOptionItemsSpec();
 
-		var response = await _mealRepository.GetAllWithSelectAsync(spec, cancellationToken);
+		var response = await mealRepository.GetAllWithSelectAsync(spec, cancellationToken);
 
 		return response;
 	}
@@ -76,18 +70,20 @@ internal class MealService(IRepository<Meal> mealRepository, IMealOptionsService
 		if (request.HasOptionGroup != (request.Options is not null && request.Options.Any()))
 			return Result.Failure(MealErrors.InvalidMealOptions);
 
-		bool isMealExist = await _mealRepository
-			.IsExistsAsync(m => m.Id == mealId, cancellationToken: cancellationToken);
-
-		if (!isMealExist)
-			return Result.Failure(MealErrors.MealNotFound);
-
-		bool isMealNameDuplicated = await _mealRepository
+		bool isMealNameDuplicated = await mealRepository
 			.IsExistsAsync(m => m.Name == request.Name && m.Id != mealId, cancellationToken: cancellationToken);
 
 		if (isMealNameDuplicated)
 			return Result.Failure(MealErrors.DuplicatedMealName);
 
 		return Result.Success();
+	}
+
+	private static bool ThereAnyNewMealDataToUpdate(Meal oldMeal, UpdateMealRequest request)
+	{
+		return oldMeal.Name != request.Name ||
+			   oldMeal.Description != request.Description ||
+			   oldMeal.Price != request.Price ||
+			   oldMeal.HasOptionGroup != request.HasOptionGroup;
 	}
 }

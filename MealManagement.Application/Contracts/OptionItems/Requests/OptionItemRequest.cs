@@ -4,5 +4,5 @@ public sealed record OptionItemRequest
 (
 	string Name,
 	decimal Price,
-	bool IsPobular
+	bool IsPopular
 );

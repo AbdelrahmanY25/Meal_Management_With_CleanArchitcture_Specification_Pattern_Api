@@ -9,7 +9,7 @@ internal static class EfSpecificationEvaluator<TEntity> where TEntity : class
 		if (spec.Filter is not null)
 			query = query.Where(spec.Filter);
 
-		if (spec.Includes is not null) 
+		if (spec.Includes.Count > 0 || spec.IncludeStrings.Count > 0) 
 		{
 			query = spec.Includes.Aggregate(query, (current, include) => current.Include(include));
 			query = spec.IncludeStrings.Aggregate(query, (current, include) => current.Include(include));

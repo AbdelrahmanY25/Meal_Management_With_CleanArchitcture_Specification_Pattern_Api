@@ -12,10 +12,12 @@ public interface IRepository<TEntity> where TEntity : class
 
 	Task<TEntity> AddAsync(TEntity entity, CancellationToken cancellationToken = default);
 	Task<IEnumerable<TEntity>> AddRangeAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default);
+	
 	void Update(TEntity entity);
+	void UpdateRange(IEnumerable<TEntity> entities);
+
 	void Delete(TEntity entity);
 	void DeleteRange(IEnumerable<TEntity> entities);
-
 
 	Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

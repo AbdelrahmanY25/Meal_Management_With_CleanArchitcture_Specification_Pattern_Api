@@ -1,57 +1,60 @@
 ﻿namespace MealManagement.Application.Services;
 
-internal class MealOptionsService(IRepository<MealOptionGroup> mealOptionsReqpository, IMealOptionItemsService itemsService) : IMealOptionsService
+internal class MealOptionsService(IRepository<MealOptionGroup> mealOptionsRepository, IMealOptionItemsService itemsService) : IMealOptionsService
 {
-	private readonly IMealOptionItemsService _itemsService = itemsService;
-	private readonly IRepository<MealOptionGroup> _mealOptionsReqpository = mealOptionsReqpository;
-
-	public async Task UpdateAsync(bool isMealDbHasOptions, string mealId,
-		IEnumerable<MealOptionGroup> mealOptionsDb,
-		IEnumerable<MealOptionRequest> mealOptionsReq,
+	public async Task UpdateAsync(string mealId,
+		IReadOnlyList<MealOptionGroup> mealOptionsDb,
+		IReadOnlyList<MealOptionRequest> mealOptionsReq,
 		CancellationToken cancellationToken)
 	{
-		var deletedOptions = mealOptionsDb!.Where(db => mealOptionsReq!.All(req => req.Name != db.Name)).ToList();
+		mealOptionsDb ??= [];
+		mealOptionsReq ??= [];
+
+		var dbNames = mealOptionsDb.ToDictionary(r => r.Name);
+
+		var reqNames = mealOptionsReq.ToDictionary(r => r.Name);
+
+		var deletedOptions = mealOptionsDb.Where(db => !reqNames.ContainsKey(db.Name)).ToList();
 
 		if (deletedOptions.Count > 0)
 			DeleteMany(deletedOptions);
 
-		var updatedOptionsDb = mealOptionsDb!.Where(db => mealOptionsReq!.Any(req => req.Name == db.Name)).ToList();
-
-		var updatedOptionsReq = mealOptionsReq!.Where(req => mealOptionsDb!.Any(db => db.Name == req.Name)).ToList();
+		var updatedOptionsDb = mealOptionsDb.Where(db => reqNames.ContainsKey(db.Name)).ToList();
 		
-		if (updatedOptionsDb.Count > 0 && updatedOptionsReq.Count > 0)
+		foreach (var optionDb in updatedOptionsDb)
 		{
-			foreach (var optionDb in updatedOptionsDb) {
-				await _itemsService.UpdateAsync(optionDb.Id, updatedOptionsDb.SelectMany(x => x.Items), updatedOptionsReq.SelectMany(x => x.Items), cancellationToken);
-			}
-		}
+			var matchingReq = reqNames[optionDb.Name];
 
-		var newOptions = mealOptionsReq!.Where(req => mealOptionsDb!.All(db => db.Name != req.Name)).ToList();
+			await itemsService
+				.UpdateAsync(optionDb.Id, (IReadOnlyList<OptionGroupItems>)optionDb.Items, matchingReq.Items.ToList() ?? [], cancellationToken);
+		}
+		
+		var newOptions = mealOptionsReq.Where(req => !dbNames.ContainsKey(req.Name)).ToList();
 
 		if (newOptions.Count > 0)
 			await AddManyAsync(mealId, newOptions, cancellationToken);
 	}
 
-	private async Task AddManyAsync(string mealId, IEnumerable<MealOptionRequest> mealOptionsReq, CancellationToken cancellationToken)
+	private async Task AddManyAsync(string mealId, IReadOnlyList<MealOptionRequest> mealOptionsReq, CancellationToken cancellationToken)
 	{
-		IEnumerable<MealOptionGroup> newOptions = [.. mealOptionsReq.Select(x => new MealOptionGroup
+		IReadOnlyList<MealOptionGroup> newOptions = [.. mealOptionsReq.Select(x => new MealOptionGroup
 			{
 				MealId = mealId,
 				Name = x.Name,
 				Items = [.. x.Items.Select(i => new OptionGroupItems
 				{
 					Name = i.Name,
-					IsPobular = i.IsPobular,
+					IsPopular = i.IsPopular,
 					Price = i.Price
 				})]
 			})];
 
-		await _mealOptionsReqpository.AddRangeAsync(newOptions, cancellationToken);
+		await mealOptionsRepository.AddRangeAsync(newOptions, cancellationToken);
 	}
 
-	private void DeleteMany(IEnumerable<MealOptionGroup> mealOptionsDb)
+	private void DeleteMany(IReadOnlyList<MealOptionGroup> mealOptionsDb)
 	{
-		_itemsService.DeleteMany(mealOptionsDb.SelectMany(x => x.Items));
-		_mealOptionsReqpository.DeleteRange(mealOptionsDb);
+		itemsService.DeleteMany([.. mealOptionsDb.SelectMany(x => x.Items)]);
+		mealOptionsRepository.DeleteRange(mealOptionsDb);
 	}
 }

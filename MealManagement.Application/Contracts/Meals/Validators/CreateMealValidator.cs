@@ -1,6 +1,6 @@
 ﻿namespace MealManagement.Application.Contracts.Meals.Validators;
 
-internal class CreateMealValidator : AbstractValidator<CreateMealRequest>
+public class CreateMealValidator : AbstractValidator<CreateMealRequest>
 {
 	public CreateMealValidator()
 	{
@@ -31,7 +31,7 @@ internal class CreateMealValidator : AbstractValidator<CreateMealRequest>
 				(o.Count() == o.DistinctBy(x => x.Name).Count())
 			)
 			.When(m => m.Options is not null && m.Options.Any())
-			.WithMessage("Option groups must be with unique names and display orders, and max 25 options.");
+			.WithMessage("Option groups must be with unique names and display orders, and max 20 options.");
 
 		RuleForEach(m => m.Options)
 			.SetValidator(new CreateMealOptionValidator())

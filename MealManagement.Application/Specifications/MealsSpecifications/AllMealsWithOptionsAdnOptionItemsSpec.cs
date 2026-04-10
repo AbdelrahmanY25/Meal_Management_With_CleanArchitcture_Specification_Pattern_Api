@@ -17,7 +17,7 @@ internal class AllMealsWithOptionsAdnOptionItemsSpec : Specification<Meal, MealR
 					i.Id,
 					i.Name,
 					i.Price,
-					i.IsPobular
+					i.IsPopular
 				)).ToList()
 			)).ToList()
 		);

@@ -1,6 +1,6 @@
 ﻿namespace MealManagement.Application.Contracts.OptionItems.Validators;
 
-internal class CreateOptionItemValidator : AbstractValidator<OptionItemRequest>
+public class CreateOptionItemValidator : AbstractValidator<OptionItemRequest>
 {
 	public CreateOptionItemValidator()
 	{

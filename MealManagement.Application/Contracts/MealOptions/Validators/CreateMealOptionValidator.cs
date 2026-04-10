@@ -1,6 +1,6 @@
 ﻿namespace MealManagement.Application.Contracts.MealOptions.Validators;
 
-internal class CreateMealOptionValidator : AbstractValidator<MealOptionRequest>
+public class CreateMealOptionValidator : AbstractValidator<MealOptionRequest>
 {
 	public CreateMealOptionValidator()
 	{
@@ -11,11 +11,11 @@ internal class CreateMealOptionValidator : AbstractValidator<MealOptionRequest>
 
 		RuleFor(x => x.Items)
 			.Must(x => 
-				(x.Any() && x.Count() <= 20) &&
+				(x.Any() && x.Count() <= 10) &&
 				(x.Count() == x.DistinctBy(x => x.Name).Count())
 			)
 			.When(x => x.Items is not null && x.Items.Any())
-			.WithMessage("Option items must be between 1 and 20 with unique names and display orders.");
+			.WithMessage("Option items must be between 1 and 10 with unique names and display orders.");
 
 		RuleForEach(x => x.Items)
 			.SetValidator(new CreateOptionItemValidator())

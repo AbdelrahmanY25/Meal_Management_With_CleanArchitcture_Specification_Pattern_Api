@@ -6,6 +6,6 @@ internal class MealByIdSpec : Specification<Meal>
 	{
 		AsNoTracking = false;
 		
-		Filter = m => m.Id == mealId;
+		AddFilter(m => m.Id == mealId);
 	}
 }

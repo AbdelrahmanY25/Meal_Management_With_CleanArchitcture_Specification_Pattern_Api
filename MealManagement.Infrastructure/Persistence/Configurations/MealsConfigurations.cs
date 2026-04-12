@@ -6,10 +6,6 @@ internal class MealsConfigurations : IEntityTypeConfiguration<Meal>
 	{	
 		builder.ToTable("Meals", "Menu");
 
-		builder.HasMany(m => m.MealOptionGroups)
-			.WithOne(mog => mog.Meal)
-			.HasForeignKey(mog => mog.MealId);
-
 		builder.Property(m => m.Name)
 			.HasMaxLength(30);
 

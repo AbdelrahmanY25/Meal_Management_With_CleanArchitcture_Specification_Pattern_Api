@@ -8,8 +8,8 @@ internal static class MealSelectors
 			m.Name,
 			m.Description,
 			m.Price,
-			m.HasOptionGroup,
-			m.MealOptionGroups.Select(g => new MealOptionsResponse(
+			m.HasOptions,
+			m.Options.Select(g => new MealOptionsResponse(
 				g.Id,
 				g.Name,
 				g.Items.Select(i => new OptionItemsResponse(

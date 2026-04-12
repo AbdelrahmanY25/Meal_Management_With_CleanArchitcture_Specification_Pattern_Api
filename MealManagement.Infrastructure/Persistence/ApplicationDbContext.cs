@@ -3,8 +3,8 @@
 internal class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
 {
 	public DbSet<Meal> Meals { get; set; }
-	public DbSet<MealOptionGroup> MealOptionGroups { get; set; }
-	public DbSet<OptionGroupItems> OptionGroupItems { get; set; }
+	public DbSet<MealOption> MealOptions { get; set; }
+	public DbSet<MealOptionsItem> MealOptionsItems { get; set; }
 
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{

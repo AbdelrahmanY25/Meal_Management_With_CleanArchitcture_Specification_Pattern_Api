@@ -21,7 +21,7 @@ public class MealServiceTest
 		var result = await sut.AddAsync(request, CancellationToken.None);
 
 		// Assert
-		A.CallTo(() => mealRepository.AddAsync(A<Meal>.Ignored, A<CancellationToken>.Ignored))
+		A.CallTo(() => mealRepository.Add(A<Meal>.Ignored))
 			.MustNotHaveHappened();
 		
 		A.CallTo(() => mealRepository.SaveChangesAsync(A<CancellationToken>.Ignored))
@@ -46,8 +46,8 @@ public class MealServiceTest
 			.IsExistsAsync(A<Expression<Func<Meal, bool>>>.Ignored, A<bool>.Ignored, A<CancellationToken>.Ignored))
 			.Returns(false);
 
-		A.CallTo(() => mealRepository.AddAsync(A<Meal>.Ignored, A<CancellationToken>.Ignored))
-			.ReturnsLazily((Meal m, CancellationToken _) => m);
+		A.CallTo(() => mealRepository.Add(A<Meal>.Ignored))
+			.ReturnsLazily((Meal m) => m);
 
 		A.CallTo(() => mealRepository.SaveChangesAsync(A<CancellationToken>.Ignored));
 
@@ -60,9 +60,9 @@ public class MealServiceTest
 		Assert.Equal(request.Name, result.Value.Name);
 		Assert.Equal(request.Description, result.Value.Description);
 		Assert.Equal(request.Price, result.Value.Price);
-		Assert.Equal(request.HasOptionGroup, result.Value.HasOptionGroup);
+		Assert.Equal(request.HasOptions, result.Value.HasOptionGroup);
 		
-		A.CallTo(() => mealRepository.AddAsync(A<Meal>.Ignored, A<CancellationToken>.Ignored))
+		A.CallTo(() => mealRepository.Add(A<Meal>.Ignored))
 			.MustHaveHappenedOnceExactly()
 			.Then(A.CallTo(() => mealRepository.SaveChangesAsync(A<CancellationToken>.Ignored))
 				.MustHaveHappenedOnceExactly());

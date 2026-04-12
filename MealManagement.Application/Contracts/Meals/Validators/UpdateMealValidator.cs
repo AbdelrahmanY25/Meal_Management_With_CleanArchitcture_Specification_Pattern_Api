@@ -15,10 +15,9 @@ public class UpdateMealValidator : AbstractValidator<UpdateMealRequest>
 			.MaximumLength(100);
 
 		RuleFor(m => m.Price)
-			.NotEmpty()
 			.GreaterThanOrEqualTo(0);
 
-		RuleFor(m => m.HasOptionGroup)
+		RuleFor(m => m.HasOptions)
 			.Must((mealRequest, hasGroup) =>
 			{
 				return hasGroup == (mealRequest.Options is not null && mealRequest.Options.Any());
@@ -27,14 +26,16 @@ public class UpdateMealValidator : AbstractValidator<UpdateMealRequest>
 
 		RuleFor(m => m.Options)
 			.Must(o =>
-				(o.Any() && o.Count <= 20) &&
-				(o.Count == o.DistinctBy(x => x.Name).Count())
+				{
+					var list = o!.ToList();
+					return list.Count >= 1 && list.Count <= 20 && list.Count == list.DistinctBy(opt => opt.Name).Count();
+				}
 			)
 			.When(m => m.Options is not null && m.Options.Any())
 			.WithMessage("Meal options must be with unique names, and max 20 options.");
 
 		RuleForEach(m => m.Options)
-			.SetValidator(new CreateMealOptionValidator())
+			.SetValidator(new MealOptionValidator())
 			.When(m => m.Options is not null && m.Options.Any());
 	}
 }

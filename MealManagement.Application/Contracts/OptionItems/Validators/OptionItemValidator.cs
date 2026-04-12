@@ -1,8 +1,8 @@
 ﻿namespace MealManagement.Application.Contracts.OptionItems.Validators;
 
-public class CreateOptionItemValidator : AbstractValidator<OptionItemRequest>
+public class OptionItemValidator : AbstractValidator<OptionItemRequest>
 {
-	public CreateOptionItemValidator()
+	public OptionItemValidator()
 	{
 		RuleFor(x => x.Name)
 			.NotEmpty()

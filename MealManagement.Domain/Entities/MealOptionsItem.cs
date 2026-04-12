@@ -1,6 +1,6 @@
 ﻿namespace MealManagement.Domain.Entities;
 
-public sealed class OptionGroupItems
+public sealed class MealOptionsItem
 {
 	public string Id { get; set; } = Guid.CreateVersion7().ToString();
 	public string OptionGroupId { get; set; } = string.Empty;
@@ -9,5 +9,5 @@ public sealed class OptionGroupItems
 	public decimal Price { get; set; }
 	public bool IsPopular { get; set; } = false;
 
-	public MealOptionGroup OptionGroup { get; set; } = default!;
+	public MealOption Option { get; set; } = default!;
 }

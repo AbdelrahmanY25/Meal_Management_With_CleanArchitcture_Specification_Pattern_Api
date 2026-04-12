@@ -1,6 +1,4 @@
-﻿using System.Linq.Expressions;
-
-namespace MealManagement.Infrastructure.Repositories;
+﻿namespace MealManagement.Infrastructure.Repositories;
 
 internal sealed class Repository<TEntity>(ApplicationDbContext context) : IRepository<TEntity> where TEntity : class
 {
@@ -35,8 +33,6 @@ internal sealed class Repository<TEntity>(ApplicationDbContext context) : IRepos
 		return await query.ToListAsync(cancellationToken);
 	}
 
-
-
 	public async Task<bool> IsExistsAsync(Expression<Func<TEntity, bool>> expression, bool ignoreQueryFilter = false, CancellationToken cancellationToken = default)
 	{
 		return await (ignoreQueryFilter
@@ -44,18 +40,16 @@ internal sealed class Repository<TEntity>(ApplicationDbContext context) : IRepos
 			: _dbSet.AsNoTracking().AnyAsync(expression, cancellationToken));
 	}
 
-
-
-	public async Task<TEntity> AddAsync(TEntity entity, CancellationToken cancellationToken)
+	public TEntity Add(TEntity entity)
 	{
-		await _dbSet.AddAsync(entity, cancellationToken);
+		_dbSet.Add(entity);
 
 		return entity;
 	}
 
-	public async Task<IEnumerable<TEntity>> AddRangeAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken)
+	public IEnumerable<TEntity> AddRange(IEnumerable<TEntity> entities)
 	{
-		await _dbSet.AddRangeAsync(entities, cancellationToken);
+		_dbSet.AddRange(entities);
 		return entities;
 	}
 

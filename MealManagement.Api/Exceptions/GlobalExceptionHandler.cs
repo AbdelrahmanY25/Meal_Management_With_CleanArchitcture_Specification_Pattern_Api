@@ -13,7 +13,7 @@ internal class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger, IP
 			Exception = exception,
 			ProblemDetails = {
 				Status = StatusCodes.Status500InternalServerError,
-				Title = "Internal Server Eerror.",
+				Title = "Internal Server Error.",
 				Type = "https://datatracker.ietf.org/doc/html/rfc7231#section-6.6.1"
 			}
 

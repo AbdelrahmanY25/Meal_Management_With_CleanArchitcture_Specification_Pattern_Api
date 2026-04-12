@@ -1,6 +1,7 @@
 ﻿global using System.Linq.Expressions;
 
 
+
 global using MealManagement.Application.Mapping;
 global using MealManagement.Application.Services;
 global using MealManagement.Application.Common.Errors;
@@ -18,10 +19,11 @@ global using MealManagement.Application.Contracts.MealOptions.Validators;
 global using MealManagement.Application.Contracts.OptionItems.Validators;
 global using MealManagement.Application.Specifications.MealsSpecifications;
 global using MealManagement.Application.Specifications.MealOptionsSpecifications;
-global using MealManagement.Application.Specifications.MealOptionsItemsSpecifications;
+
 
 
 global using MealManagement.Domain.Entities;
+
 
 
 global using Microsoft.AspNetCore.Http;

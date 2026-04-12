@@ -1,10 +1,14 @@
 ﻿namespace MealManagement.Infrastructure.Persistence.Configurations;
 
-internal class OptionGroupItemsConfigurations : IEntityTypeConfiguration<OptionGroupItems>
+internal class OptionGroupItemsConfigurations : IEntityTypeConfiguration<MealOptionsItem>
 {
-	public void Configure(EntityTypeBuilder<OptionGroupItems> builder)
+	public void Configure(EntityTypeBuilder<MealOptionsItem> builder)
 	{
-		builder.ToTable("OptionGroupItems", "Menu");
+		builder.ToTable("MealOptionsItems", "Menu");
+
+		builder.HasOne(e => e.Option)
+			.WithMany(e => e.Items)
+			.HasForeignKey(e => e.OptionGroupId);
 
 		builder.Property(e => e.Name)
 			.HasMaxLength(30);	

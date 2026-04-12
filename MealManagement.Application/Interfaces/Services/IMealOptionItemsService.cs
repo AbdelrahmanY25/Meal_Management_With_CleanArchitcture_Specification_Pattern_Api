@@ -2,6 +2,6 @@
 
 public interface IMealOptionItemsService
 {
-	Task UpdateAsync(string optionId, IReadOnlyList<OptionGroupItems> mealOptionItemsDb, IReadOnlyList<OptionItemRequest> mealOptionItemsReq, CancellationToken cancellationToken);
-	void DeleteMany(IEnumerable<OptionGroupItems> mealOptionItemsDb);
+	Task UpdateAsync(string optionId, IReadOnlyList<MealOptionsItem> mealOptionItemsDb, IReadOnlyList<OptionItemRequest> mealOptionItemsReq, CancellationToken cancellationToken);
+	void DeleteMany(IEnumerable<MealOptionsItem> mealOptionItemsDb);
 }

@@ -5,6 +5,6 @@ public sealed record UpdateMealRequest
 	string Name,
 	string Description,
 	decimal Price,
-	bool HasOptionGroup,
-	IReadOnlyList<MealOptionRequest> Options
+	bool HasOptions,
+	IReadOnlyList<MealOptionRequest>? Options
 );

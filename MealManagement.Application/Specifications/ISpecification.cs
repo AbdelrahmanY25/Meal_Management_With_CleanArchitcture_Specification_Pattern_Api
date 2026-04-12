@@ -3,7 +3,7 @@
 public interface ISpecification<TEntity>
 {
 	Expression<Func<TEntity, bool>>? Filter { get; }
-	List<Expression<Func<TEntity, object>>> Includes { get; }
+	IReadOnlyList<Expression<Func<TEntity, object>>>? Includes { get; }
 
 	Expression<Func<TEntity, object>>? OrderBy { get; }
 	Expression<Func<TEntity, object>>? OrderByDescending { get; }

@@ -7,5 +7,5 @@ public sealed record MealResponse
 	string Description,
 	decimal Price,
 	bool HasOptionGroup,
-	IReadOnlyCollection<MealOptionsResponse> Options
+	IReadOnlyCollection<MealOptionsResponse>? Options
 );

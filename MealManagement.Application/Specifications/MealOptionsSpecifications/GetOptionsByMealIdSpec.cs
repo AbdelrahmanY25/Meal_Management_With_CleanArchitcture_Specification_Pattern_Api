@@ -1,11 +1,11 @@
 ﻿namespace MealManagement.Application.Specifications.MealOptionsSpecifications;
 
-internal class GetOptionsByMealIdSpec : Specification<MealOptionGroup>
+internal class GetOptionsByMealIdSpec : Specification<MealOption>
 {
 	internal GetOptionsByMealIdSpec(string mealId)
 	{		
-		Filter = opt => opt.MealId == mealId;
+		AddFilter(opt => opt.MealId == mealId);
 
-		Includes = [op => op.Items];
+		AddInclude(opt => opt.Items);
 	}
 }

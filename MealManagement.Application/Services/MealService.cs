@@ -11,7 +11,7 @@ internal class MealService(IRepository<Meal> mealRepository, IMealOptionsService
 
 		var meal = request.Adapt<Meal>();
 
-		Meal newMeal = await mealRepository.AddAsync(meal, cancellationToken);
+		Meal newMeal = mealRepository.Add(meal);
 		await mealRepository.SaveChangesAsync(cancellationToken);
 
 		return Result.Success(newMeal.Adapt<MealResponse>());
@@ -29,9 +29,9 @@ internal class MealService(IRepository<Meal> mealRepository, IMealOptionsService
 		if (await mealRepository.GetOneAsync(spec, cancellationToken) is not { } oldMeal)
 			return Result.Failure(MealErrors.MealNotFound);
 
-		if (request.HasOptionGroup || oldMeal.HasOptionGroup)
+		if (request.HasOptions || oldMeal.HasOptions)
 		{
-			var mealOptionsResult = await mealOptionsService.UpdateAsync(oldMeal.Id, request.Options, cancellationToken);
+			var mealOptionsResult = await mealOptionsService.UpdateAsync(oldMeal.Id, request.Options!, cancellationToken);
 			
 			if (mealOptionsResult.IsFailure)
 				return mealOptionsResult;
@@ -65,10 +65,10 @@ internal class MealService(IRepository<Meal> mealRepository, IMealOptionsService
 
 	private async Task<Result> ValidateMealRequestOnAdd(CreateMealRequest request, CancellationToken cancellationToken)
 	{
-		if (request.HasOptionGroup != (request.Options is not null && request.Options.Any()))
+		if (request.HasOptions != (request.Options is not null && request.Options.Any()))
 			return Result.Failure(MealErrors.InvalidOptionGroupState);
 
-		if (request.HasOptionGroup)
+		if (request.HasOptions)
 		{
 			var optionsValidationResult = ValidateMealOptionRequstOnAdd(request.Options!);
 
@@ -117,7 +117,7 @@ internal class MealService(IRepository<Meal> mealRepository, IMealOptionsService
 
 	private async Task<Result> ValidateMealOnUpdate(string mealId, UpdateMealRequest request, CancellationToken cancellationToken)
 	{
-		if (request.HasOptionGroup != (request.Options is not null && request.Options.Any()))
+		if (request.HasOptions != (request.Options is not null && request.Options.Any()))
 			return Result.Failure(MealErrors.InvalidOptionGroupState);
 
 		bool isMealNameDuplicated = await mealRepository

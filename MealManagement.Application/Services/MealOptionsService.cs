@@ -1,6 +1,6 @@
 ﻿namespace MealManagement.Application.Services;
 
-internal class MealOptionsService(IRepository<MealOptionGroup> mealOptionsRepository, IMealOptionItemsService itemsService) : IMealOptionsService
+internal class MealOptionsService(IRepository<MealOption> mealOptionsRepository, IMealOptionItemsService itemsService) : IMealOptionsService
 {
 	public async Task<Result> UpdateAsync(string mealId,
 		IReadOnlyList<MealOptionRequest> mealOptionsReq,
@@ -31,24 +31,24 @@ internal class MealOptionsService(IRepository<MealOptionGroup> mealOptionsReposi
 			var matchingReq = reqNames[optionDb.Name];
 
 			await itemsService
-				.UpdateAsync(optionDb.Id, (IReadOnlyList<OptionGroupItems>)optionDb.Items, matchingReq.Items, cancellationToken);
+				.UpdateAsync(optionDb.Id, (IReadOnlyList<MealOptionsItem>)optionDb.Items, matchingReq.Items, cancellationToken);
 		}
 		
 		var newOptions = mealOptionsReq.Where(req => !dbNames.ContainsKey(req.Name)).ToList();
 
 		if (newOptions.Count > 0)
-			await AddManyAsync(mealId, newOptions, cancellationToken);
+			AddManyAsync(mealId, newOptions, cancellationToken);
 
 		return Result.Success();
 	}
 
-	private async Task AddManyAsync(string mealId, IReadOnlyList<MealOptionRequest> mealOptionsReq, CancellationToken cancellationToken)
+	private void AddManyAsync(string mealId, IReadOnlyList<MealOptionRequest> mealOptionsReq, CancellationToken cancellationToken)
 	{
-		IEnumerable<MealOptionGroup> newOptions = [.. mealOptionsReq.Select(x => new MealOptionGroup
+		IEnumerable<MealOption> newOptions = [.. mealOptionsReq.Select(x => new MealOption
 		{
 			MealId = mealId,
 			Name = x.Name,
-			Items = [.. x.Items.Select(i => new OptionGroupItems
+			Items = [.. x.Items.Select(i => new MealOptionsItem
 			{
 				Name = i.Name,
 				IsPopular = i.IsPopular,
@@ -56,10 +56,10 @@ internal class MealOptionsService(IRepository<MealOptionGroup> mealOptionsReposi
 			})]
 		})];
 
-		await mealOptionsRepository.AddRangeAsync(newOptions, cancellationToken);
+		mealOptionsRepository.AddRange(newOptions);
 	}
 
-	private void DeleteMany(IEnumerable<MealOptionGroup> mealOptionsDb)
+	private void DeleteMany(IEnumerable<MealOption> mealOptionsDb)
 	{
 		itemsService.DeleteMany(mealOptionsDb.SelectMany(x => x.Items));
 		mealOptionsRepository.DeleteRange(mealOptionsDb);

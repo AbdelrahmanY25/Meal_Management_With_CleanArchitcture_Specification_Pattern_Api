@@ -4,13 +4,11 @@ internal class MappingConfig : IRegister
 {
 	public void Register(TypeAdapterConfig config)
 	{
-		config.NewConfig<CreateMealRequest, Meal>()
-			.Map(dest => dest.MealOptionGroups, src => src.Options);
+		config.NewConfig<CreateMealRequest, Meal>();
 
 		config.NewConfig<UpdateMealRequest, Meal>()
-			.Ignore(dest => dest.MealOptionGroups);
+			.Ignore(dest => dest.Options);
 
-		config.NewConfig<Meal, MealResponse>()
-			.Map(dest => dest.Options, src => src.MealOptionGroups);
+		config.NewConfig<Meal, MealResponse>();
 	}
 }

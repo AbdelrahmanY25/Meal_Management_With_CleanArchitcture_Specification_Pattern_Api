@@ -4,7 +4,6 @@ internal abstract class Specification<TEntity> : ISpecification<TEntity> where T
 {
 	public Expression<Func<TEntity, bool>>? Filter { get; protected set; }
 	public List<Expression<Func<TEntity, object>>> Includes { get; protected set; } = [];
-	public List<string> IncludeStrings { get; protected set; } = [];
 
 	public Expression<Func<TEntity, object>>? OrderBy { get; protected set; }
 	public Expression<Func<TEntity, object>>? OrderByDescending { get; protected set; }

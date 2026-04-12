@@ -2,13 +2,18 @@
 
 internal class MealOptionsService(IRepository<MealOptionGroup> mealOptionsRepository, IMealOptionItemsService itemsService) : IMealOptionsService
 {
-	public async Task UpdateAsync(string mealId,
-		IReadOnlyList<MealOptionGroup> mealOptionsDb,
+	public async Task<Result> UpdateAsync(string mealId,
 		IReadOnlyList<MealOptionRequest> mealOptionsReq,
 		CancellationToken cancellationToken)
 	{
-		mealOptionsDb ??= [];
-		mealOptionsReq ??= [];
+		var validationResult = ValidateMealOptionsRequestOnUpdate(mealOptionsReq);
+
+		if (validationResult.IsFailure)
+			return validationResult;
+
+		var spec = new GetOptionsByMealIdSpec(mealId);
+		
+		var mealOptionsDb = await mealOptionsRepository.GetAllAsync(spec, cancellationToken);
 
 		var dbNames = mealOptionsDb.ToDictionary(r => r.Name);
 
@@ -26,35 +31,67 @@ internal class MealOptionsService(IRepository<MealOptionGroup> mealOptionsReposi
 			var matchingReq = reqNames[optionDb.Name];
 
 			await itemsService
-				.UpdateAsync(optionDb.Id, (IReadOnlyList<OptionGroupItems>)optionDb.Items, matchingReq.Items.ToList() ?? [], cancellationToken);
+				.UpdateAsync(optionDb.Id, (IReadOnlyList<OptionGroupItems>)optionDb.Items, matchingReq.Items, cancellationToken);
 		}
 		
 		var newOptions = mealOptionsReq.Where(req => !dbNames.ContainsKey(req.Name)).ToList();
 
 		if (newOptions.Count > 0)
 			await AddManyAsync(mealId, newOptions, cancellationToken);
+
+		return Result.Success();
 	}
 
 	private async Task AddManyAsync(string mealId, IReadOnlyList<MealOptionRequest> mealOptionsReq, CancellationToken cancellationToken)
 	{
-		IReadOnlyList<MealOptionGroup> newOptions = [.. mealOptionsReq.Select(x => new MealOptionGroup
+		IEnumerable<MealOptionGroup> newOptions = [.. mealOptionsReq.Select(x => new MealOptionGroup
+		{
+			MealId = mealId,
+			Name = x.Name,
+			Items = [.. x.Items.Select(i => new OptionGroupItems
 			{
-				MealId = mealId,
-				Name = x.Name,
-				Items = [.. x.Items.Select(i => new OptionGroupItems
-				{
-					Name = i.Name,
-					IsPopular = i.IsPopular,
-					Price = i.Price
-				})]
-			})];
+				Name = i.Name,
+				IsPopular = i.IsPopular,
+				Price = i.Price
+			})]
+		})];
 
 		await mealOptionsRepository.AddRangeAsync(newOptions, cancellationToken);
 	}
 
-	private void DeleteMany(IReadOnlyList<MealOptionGroup> mealOptionsDb)
+	private void DeleteMany(IEnumerable<MealOptionGroup> mealOptionsDb)
 	{
-		itemsService.DeleteMany([.. mealOptionsDb.SelectMany(x => x.Items)]);
+		itemsService.DeleteMany(mealOptionsDb.SelectMany(x => x.Items));
 		mealOptionsRepository.DeleteRange(mealOptionsDb);
+	}
+
+	private static Result ValidateMealOptionsRequestOnUpdate(IReadOnlyList<MealOptionRequest> mealOptionsReq) 
+	{
+		if (mealOptionsReq.Count > 20)
+			return Result.Failure(MealOptionsErrors.InvalidMealOptionsCount);
+
+		if (mealOptionsReq.Count != mealOptionsReq.DistinctBy(opt => opt.Name).Count())
+			return Result.Failure(MealOptionsErrors.DuplicatedOptionName);
+
+		foreach (var option in mealOptionsReq)
+		{
+			var itemsValidationResult = ValidateMealOptionItemsRequestOnAdd(option.Items);
+		
+			if (itemsValidationResult.IsFailure)
+				return itemsValidationResult;
+		}
+
+		return Result.Success();
+	}
+
+	private static Result ValidateMealOptionItemsRequestOnAdd(IReadOnlyList<OptionItemRequest> items)
+	{
+		if (items is null || items.Count == 0 || items.Count > 10)
+			return Result.Failure(MealOptionsItemsErrors.InvalidMealOptionsItemsCount);
+
+		if ((items.Select(i => i.Name).Count() != items.DistinctBy(i => i.Name).Count()))
+			return Result.Failure(MealOptionsItemsErrors.DuplicatedItemName);
+
+		return Result.Success();
 	}
 }

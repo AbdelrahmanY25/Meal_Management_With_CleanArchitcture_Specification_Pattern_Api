@@ -1,10 +1,9 @@
 ﻿namespace MealManagement.Application.Specifications.MealsSpecifications;
 
-internal class AllMealsWithOptionsAdnOptionItemsSpec : Specification<Meal, MealResponse>
+internal static class MealSelectors
 {
-	internal AllMealsWithOptionsAdnOptionItemsSpec()
-	{
-		Selector = m => new MealResponse(
+	internal static readonly Expression<Func<Meal, MealResponse>> MealResponseSelector =
+		m => new MealResponse(
 			m.Id,
 			m.Name,
 			m.Description,
@@ -21,5 +20,5 @@ internal class AllMealsWithOptionsAdnOptionItemsSpec : Specification<Meal, MealR
 				)).ToList()
 			)).ToList()
 		);
-	}
+
 }

@@ -9,7 +9,7 @@ global using MealManagement.Application.Common.Abstractions;
 global using MealManagement.Application.Interfaces.Services;
 global using MealManagement.Application.Interfaces.Persistence;
 global using MealManagement.Application.Contracts.Meals.Requests;
-global using MealManagement.Application.Contracts.Meals.Response;
+global using MealManagement.Application.Contracts.Meals.Responses;
 global using MealManagement.Application.Contracts.MealOptions.Requests;
 global using MealManagement.Application.Contracts.OptionItems.Requests;
 global using MealManagement.Application.Contracts.MealOptions.Responses;
@@ -18,6 +18,7 @@ global using MealManagement.Application.Contracts.MealOptions.Validators;
 global using MealManagement.Application.Contracts.OptionItems.Validators;
 global using MealManagement.Application.Specifications.MealsSpecifications;
 global using MealManagement.Application.Specifications.MealOptionsSpecifications;
+global using MealManagement.Application.Specifications.MealOptionsItemsSpecifications;
 
 
 global using MealManagement.Domain.Entities;

@@ -2,7 +2,7 @@
 
 internal class MealOptionItemsService(IRepository<OptionGroupItems> itemsRepository) : IMealOptionItemsService
 {
-	public async Task UpdateAsync(string mealOptionGroupId,
+	public async Task UpdateAsync(string optionId,
 		IReadOnlyList<OptionGroupItems> mealOptionItemsDb,
 		IReadOnlyList<OptionItemRequest> mealOptionItemsReq,
 		CancellationToken cancellationToken)
@@ -30,12 +30,12 @@ internal class MealOptionItemsService(IRepository<OptionGroupItems> itemsReposit
 		var newItems = mealOptionItemsReq.Where(req => !dbName.ContainsKey(req.Name)).ToList();
 
 		if (newItems.Count > 0)
-			await AddManyAsync(mealOptionGroupId, newItems, cancellationToken);
+			await AddManyAsync(optionId, newItems, cancellationToken);
 	}
 
 	private async Task AddManyAsync(string mealOptionGroupId, IReadOnlyList<OptionItemRequest> mealOptionItemsReq, CancellationToken cancellationToken)
 	{
-		IReadOnlyList<OptionGroupItems> newItems = [.. mealOptionItemsReq.Select(x => new OptionGroupItems
+		IEnumerable<OptionGroupItems> newItems = [.. mealOptionItemsReq.Select(x => new OptionGroupItems
 		{
 			OptionGroupId = mealOptionGroupId,
 			Name = x.Name,
@@ -46,7 +46,7 @@ internal class MealOptionItemsService(IRepository<OptionGroupItems> itemsReposit
 		await itemsRepository.AddRangeAsync(newItems, cancellationToken);
 	}
 
-	public void DeleteMany(IReadOnlyList<OptionGroupItems> mealOptionItemsDb)
+	public void DeleteMany(IEnumerable<OptionGroupItems> mealOptionItemsDb)
 	{
 		itemsRepository.DeleteRange(mealOptionItemsDb);
 	}

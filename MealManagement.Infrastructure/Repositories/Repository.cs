@@ -9,28 +9,28 @@ internal sealed class Repository<TEntity>(ApplicationDbContext context) : IRepos
 
 	public async Task<TEntity?> GetOneAsync(ISpecification<TEntity> spec, CancellationToken cancellationToken)
 	{
-		var query = EfSpecificationEvaluator<TEntity>.GetQuery(_dbSet.AsQueryable(), spec);
+		var query = EfSpecificationQueryBuilder<TEntity>.GetQuery(_dbSet.AsQueryable(), spec);
 
 		return await query.FirstOrDefaultAsync(cancellationToken);
 	}
 
 	public async Task<IReadOnlyList<TEntity>> GetAllAsync(ISpecification<TEntity> spec, CancellationToken cancellationToken)
 	{
-		var query = EfSpecificationEvaluator<TEntity>.GetQuery(_dbSet.AsQueryable(), spec);
+		var query = EfSpecificationQueryBuilder<TEntity>.GetQuery(_dbSet.AsQueryable(), spec);
 
 		return await query.ToListAsync(cancellationToken);
 	}
 
 	public async Task<TResult?> GetOneWithSelectAsync<TResult>(ISpecification<TEntity, TResult> spec, CancellationToken cancellationToken)
 	{
-		var query = EfSpecificationEvaluator<TEntity, TResult>.GetQuery(_dbSet.AsQueryable(), spec);
+		var query = EfSpecificationQueryBuilder<TEntity, TResult>.GetQuery(_dbSet.AsQueryable(), spec);
 
 		return await query.FirstOrDefaultAsync(cancellationToken);
 	}
 
 	public async Task<IReadOnlyList<TResult>> GetAllWithSelectAsync<TResult>(ISpecification<TEntity, TResult> spec, CancellationToken cancellationToken)
 	{
-		var query = EfSpecificationEvaluator<TEntity, TResult>.GetQuery(_dbSet.AsQueryable(), spec);
+		var query = EfSpecificationQueryBuilder<TEntity, TResult>.GetQuery(_dbSet.AsQueryable(), spec);
 
 		return await query.ToListAsync(cancellationToken);
 	}

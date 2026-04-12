@@ -8,6 +8,6 @@ public static class MealErrors
 	public static readonly Error DuplicatedMealName = 
 		new("Meal.DuplicatedMealName", "A meal with the same name already exists.", StatusCodes.Status409Conflict);
 
-	public static readonly Error InvalidMealOptions = 
-		new("Meal.InvalidMealOptions", "The meal options are invalid.", StatusCodes.Status400BadRequest);
+	public static readonly Error InvalidOptionGroupState = 
+		new("Meal.InvalidOptionGroupState", "The meal option group state is invalid.", StatusCodes.Status400BadRequest);
 }

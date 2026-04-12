@@ -1,4 +1,4 @@
-﻿namespace MealManagement.Application.Contracts.Meals.Response;
+﻿namespace MealManagement.Application.Contracts.Meals.Responses;
 
 public sealed record MealResponse
 (

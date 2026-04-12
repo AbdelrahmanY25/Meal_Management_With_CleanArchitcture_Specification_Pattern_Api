@@ -6,5 +6,5 @@ public sealed record UpdateMealRequest
 	string Description,
 	decimal Price,
 	bool HasOptionGroup,
-	IEnumerable<MealOptionRequest> Options
+	IReadOnlyList<MealOptionRequest> Options
 );

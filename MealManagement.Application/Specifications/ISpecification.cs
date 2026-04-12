@@ -4,7 +4,6 @@ public interface ISpecification<TEntity>
 {
 	Expression<Func<TEntity, bool>>? Filter { get; }
 	List<Expression<Func<TEntity, object>>> Includes { get; }
-	List<string> IncludeStrings { get; }
 
 	Expression<Func<TEntity, object>>? OrderBy { get; }
 	Expression<Func<TEntity, object>>? OrderByDescending { get; }

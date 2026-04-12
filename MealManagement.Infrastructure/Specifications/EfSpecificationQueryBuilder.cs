@@ -1,6 +1,6 @@
 ﻿namespace MealManagement.Infrastructure.Specifications;
 
-internal static class EfSpecificationEvaluator<TEntity> where TEntity : class
+internal static class EfSpecificationQueryBuilder<TEntity> where TEntity : class
 {
 	internal static IQueryable<TEntity> GetQuery(IQueryable<TEntity> inputQuery, ISpecification<TEntity> spec)
 	{
@@ -34,11 +34,11 @@ internal static class EfSpecificationEvaluator<TEntity> where TEntity : class
 	}
 }
 
-internal static class EfSpecificationEvaluator<TEntity, TResult> where TEntity : class
+internal static class EfSpecificationQueryBuilder<TEntity, TResult> where TEntity : class
 {
 	internal static IQueryable<TResult> GetQuery(IQueryable<TEntity> inputQuery, ISpecification<TEntity, TResult> spec)
 	{
-		var query = EfSpecificationEvaluator<TEntity>.GetQuery(inputQuery, spec);
+		var query = EfSpecificationQueryBuilder<TEntity>.GetQuery(inputQuery, spec);
 
 		if (spec.Selector is null)
 			throw new InvalidOperationException("Selector must be provided for projection specifications.");

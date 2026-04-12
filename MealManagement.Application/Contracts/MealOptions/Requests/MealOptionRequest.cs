@@ -3,5 +3,5 @@
 public sealed record MealOptionRequest
 (
 	string Name,
-	IEnumerable<OptionItemRequest> Items
+	IReadOnlyList<OptionItemRequest> Items
 );

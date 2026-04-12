@@ -6,5 +6,5 @@ public sealed record CreateMealRequest
 	string Description,
 	decimal Price,
 	bool HasOptionGroup,
-	IEnumerable<MealOptionRequest> Options
+	IReadOnlyList<MealOptionRequest> Options
 );

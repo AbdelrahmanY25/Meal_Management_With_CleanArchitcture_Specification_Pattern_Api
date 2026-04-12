@@ -1,5 +1,5 @@
 ﻿global using MealManagement.Api.Extensions;
-global using MealManagement.Api.Excceptions;
+global using MealManagement.Api.Exceptions;
 
 global using MealManagement.Application;
 global using MealManagement.Application.Common.Abstractions;

@@ -2,5 +2,5 @@
 
 public interface IMealOptionsService
 {
-	Task UpdateAsync(string mealId, IReadOnlyList<MealOptionGroup> mealOptionsDb, IReadOnlyList<MealOptionRequest> mealOptionsReq, CancellationToken cancellationToken);
+	Task<Result> UpdateAsync(string mealId, IReadOnlyList<MealOptionRequest> mealOptionsReq, CancellationToken cancellationToken);
 }

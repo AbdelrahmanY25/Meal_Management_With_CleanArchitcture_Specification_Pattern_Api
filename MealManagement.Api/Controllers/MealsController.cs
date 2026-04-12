@@ -26,7 +26,7 @@ public class MealsController(IMealService mealService) : ControllerBase
 	[HttpGet("{mealId}")]
 	public async Task<IActionResult> GetMeal([FromRoute] string mealId, CancellationToken cancellationToken = default)
 	{
-		var result = await _mealService.GetMeal(mealId, cancellationToken);
+		var result = await _mealService.GetMealAsync(mealId, cancellationToken);
 
 		return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
 	}
@@ -34,7 +34,7 @@ public class MealsController(IMealService mealService) : ControllerBase
 	[HttpGet]
 	public async Task<IActionResult> GetAll(CancellationToken cancellationToken = default)
 	{
-		var result = await _mealService.GetAll(cancellationToken);
+		var result = await _mealService.GetAllAsync(cancellationToken);
 
 		return Ok(result);
 	}

@@ -27,11 +27,11 @@ public class UpdateMealValidator : AbstractValidator<UpdateMealRequest>
 
 		RuleFor(m => m.Options)
 			.Must(o =>
-				(o.Any() && o.Count() <= 20) &&
-				(o.Count() == o.DistinctBy(x => x.Name).Count())
+				(o.Any() && o.Count <= 20) &&
+				(o.Count == o.DistinctBy(x => x.Name).Count())
 			)
 			.When(m => m.Options is not null && m.Options.Any())
-			.WithMessage("Option groups must be with unique names and display orders, and max 20 options.");
+			.WithMessage("Meal options must be with unique names, and max 20 options.");
 
 		RuleForEach(m => m.Options)
 			.SetValidator(new CreateMealOptionValidator())

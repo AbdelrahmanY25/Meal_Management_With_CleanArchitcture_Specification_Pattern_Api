@@ -10,14 +10,19 @@ namespace MealManagement.Infrastructure.Persistence.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.EnsureSchema(
+                name: "Menu");
+
             migrationBuilder.CreateTable(
                 name: "Meals",
+                schema: "Menu",
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
                     Description = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Price = table.Column<decimal>(type: "decimal(5,2)", precision: 5, scale: 2, nullable: false)
+                    Price = table.Column<decimal>(type: "decimal(5,2)", precision: 5, scale: 2, nullable: false),
+                    HasOptions = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -25,69 +30,85 @@ namespace MealManagement.Infrastructure.Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "MealOptionGroups",
+                name: "MealOptions",
+                schema: "Menu",
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     MealId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
-                    DisplayOrder = table.Column<int>(type: "int", nullable: false)
+                    Name = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_MealOptionGroups", x => x.Id);
+                    table.PrimaryKey("PK_MealOptions", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_MealOptionGroups_Meals_MealId",
+                        name: "FK_MealOptions_Meals_MealId",
                         column: x => x.MealId,
+                        principalSchema: "Menu",
                         principalTable: "Meals",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
-                name: "OptionGroupItems",
+                name: "MealOptionsItems",
+                schema: "Menu",
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    OptionGroupId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    OptionId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
                     Price = table.Column<decimal>(type: "decimal(5,2)", precision: 5, scale: 2, nullable: false),
-                    DisplayOrder = table.Column<int>(type: "int", nullable: false),
-                    IsPobular = table.Column<bool>(type: "bit", nullable: false)
+                    IsPopular = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_OptionGroupItems", x => x.Id);
+                    table.PrimaryKey("PK_MealOptionsItems", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_OptionGroupItems_MealOptionGroups_OptionGroupId",
-                        column: x => x.OptionGroupId,
-                        principalTable: "MealOptionGroups",
+                        name: "FK_MealOptionsItems_MealOptions_OptionId",
+                        column: x => x.OptionId,
+                        principalSchema: "Menu",
+                        principalTable: "MealOptions",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_MealOptionGroups_MealId",
-                table: "MealOptionGroups",
-                column: "MealId");
+                name: "IX_MealOptions_MealId_Name",
+                schema: "Menu",
+                table: "MealOptions",
+                columns: new[] { "MealId", "Name" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_OptionGroupItems_OptionGroupId",
-                table: "OptionGroupItems",
-                column: "OptionGroupId");
+                name: "IX_MealOptionsItems_OptionId_Name",
+                schema: "Menu",
+                table: "MealOptionsItems",
+                columns: new[] { "OptionId", "Name" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Meals_Name",
+                schema: "Menu",
+                table: "Meals",
+                column: "Name",
+                unique: true);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "OptionGroupItems");
+                name: "MealOptionsItems",
+                schema: "Menu");
 
             migrationBuilder.DropTable(
-                name: "MealOptionGroups");
+                name: "MealOptions",
+                schema: "Menu");
 
             migrationBuilder.DropTable(
-                name: "Meals");
+                name: "Meals",
+                schema: "Menu");
         }
     }
 }

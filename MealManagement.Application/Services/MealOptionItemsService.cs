@@ -2,6 +2,8 @@
 
 internal class MealOptionItemsService(IRepository<MealOptionsItem> itemsRepository) : IMealOptionItemsService
 {
+	private readonly IRepository<MealOptionsItem> _itemsRepository = itemsRepository;
+
 	public async Task UpdateAsync(string optionId,
 		IReadOnlyList<MealOptionsItem> mealOptionItemsDb,
 		IReadOnlyList<OptionItemRequest> mealOptionItemsReq,
@@ -23,8 +25,7 @@ internal class MealOptionItemsService(IRepository<MealOptionsItem> itemsReposito
 		{
 			var matchingReq = reqName[itemDb.Name];
 
-			itemDb.Price = matchingReq.Price;
-			itemDb.IsPopular = matchingReq.IsPopular;
+			itemDb.Update(matchingReq.Price, matchingReq.IsPopular);
 		}
 
 		var newItems = mealOptionItemsReq.Where(req => !dbName.ContainsKey(req.Name)).ToList();
@@ -35,22 +36,19 @@ internal class MealOptionItemsService(IRepository<MealOptionsItem> itemsReposito
 
 	public void DeleteMany(IEnumerable<MealOptionsItem> mealOptionItemsDb)
 	{
-		itemsRepository.DeleteRange(mealOptionItemsDb);
+		_itemsRepository.DeleteRange(mealOptionItemsDb);
 	}
 	
 
 
 	private void AddMany(string mealOptionGroupId, IReadOnlyList<OptionItemRequest> mealOptionItemsReq)
 	{
-		IEnumerable<MealOptionsItem> newItems = [.. mealOptionItemsReq.Select(x => new MealOptionsItem
-		{
-			OptionGroupId = mealOptionGroupId,
-			Name = x.Name,
-			IsPopular = x.IsPopular,
-			Price = x.Price
-		})];
+		var newItems = mealOptionItemsReq.Adapt<List<MealOptionsItem>>();
 
-		itemsRepository.AddRange(newItems);
+		foreach (var item in newItems)
+			item.AssignToOption(mealOptionGroupId);
+
+		_itemsRepository.AddRange(newItems);
 	}
 	
 	private static bool HasChanged(MealOptionsItem db, Dictionary<string, OptionItemRequest> reqName) =>

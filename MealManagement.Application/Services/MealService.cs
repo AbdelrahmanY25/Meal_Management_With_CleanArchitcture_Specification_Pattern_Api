@@ -2,7 +2,10 @@
 
 internal class MealService(IRepository<Meal> mealRepository, IMealOptionsService mealOptionsService) : IMealService
 {
-	public async Task<Result<MealResponse>> AddAsync(CreateMealRequest request, CancellationToken cancellationToken)
+	private readonly IRepository<Meal> _mealRepository = mealRepository;
+	private readonly IMealOptionsService _mealOptionsService = mealOptionsService;
+
+	public async Task<Result<MealResponse>> AddAsync(MealRequest request, CancellationToken cancellationToken)
 	{
 		var validationResult = await ValidateMealRequestOnAdd(request, cancellationToken);
 
@@ -11,13 +14,13 @@ internal class MealService(IRepository<Meal> mealRepository, IMealOptionsService
 
 		var meal = request.Adapt<Meal>();
 
-		Meal newMeal = mealRepository.Add(meal);
-		await mealRepository.SaveChangesAsync(cancellationToken);
+		Meal newMeal = _mealRepository.Add(meal);
+		await _mealRepository.SaveChangesAsync(cancellationToken);
 
 		return Result.Success(newMeal.Adapt<MealResponse>());
 	}
 
-	public async Task<Result> UpdateAsync(string mealId, UpdateMealRequest request, CancellationToken cancellationToken)
+	public async Task<Result> UpdateAsync(string mealId, MealRequest request, CancellationToken cancellationToken)
 	{
 		Result validationResult = await ValidateMealOnUpdate(mealId, request, cancellationToken);
 
@@ -26,20 +29,20 @@ internal class MealService(IRepository<Meal> mealRepository, IMealOptionsService
 
 		var spec = new MealByIdSpec(mealId);
 
-		if (await mealRepository.GetOneAsync(spec, cancellationToken) is not { } oldMeal)
+		if (await _mealRepository.GetOneAsync(spec, cancellationToken) is not { } oldMeal)
 			return Result.Failure(MealErrors.MealNotFound);
 
 		if (request.HasOptions || oldMeal.HasOptions)
 		{
-			var mealOptionsResult = await mealOptionsService.UpdateAsync(oldMeal.Id, request.Options!, cancellationToken);
+			var mealOptionsResult = await _mealOptionsService.UpdateAsync(oldMeal.Id, request.Options!, cancellationToken);
 			
 			if (mealOptionsResult.IsFailure)
 				return mealOptionsResult;
 		}
 
-		request.Adapt(oldMeal);
+		oldMeal.Update(request.Name, request.Description, request.Price, request.HasOptions);
 
-		await mealRepository.SaveChangesAsync(cancellationToken);
+		await _mealRepository.SaveChangesAsync(cancellationToken);
 
 		return Result.Success();
 	}	
@@ -48,7 +51,7 @@ internal class MealService(IRepository<Meal> mealRepository, IMealOptionsService
 	{
 		var spec = new MealResponseByIdWithOptionsAndItemsSpec(mealId);
 
-		if(await mealRepository.GetOneWithSelectAsync(spec, cancellationToken) is not { } response)
+		if(await _mealRepository.GetOneWithSelectAsync(spec, cancellationToken) is not { } response)
 			return Result.Failure<MealResponse>(MealErrors.MealNotFound);
 
 		return Result.Success(response!);
@@ -58,69 +61,27 @@ internal class MealService(IRepository<Meal> mealRepository, IMealOptionsService
 	{
 		var spec = new AllMealsWithOptionsAndOptionItemsSpec();
 
-		var response = await mealRepository.GetAllWithSelectAsync(spec, cancellationToken);
+		var response = await _mealRepository.GetAllWithSelectAsync(spec, cancellationToken);
 
 		return response;
 	}
 
-	private async Task<Result> ValidateMealRequestOnAdd(CreateMealRequest request, CancellationToken cancellationToken)
+	
+
+	private async Task<Result> ValidateMealRequestOnAdd(MealRequest request, CancellationToken cancellationToken)
 	{
-		if (request.HasOptions != (request.Options is not null && request.Options.Any()))
-			return Result.Failure(MealErrors.InvalidOptionGroupState);
-
-		if (request.HasOptions)
-		{
-			var optionsValidationResult = ValidateMealOptionRequstOnAdd(request.Options!);
-
-			if (optionsValidationResult.IsFailure)
-				return optionsValidationResult;
-		}
-
-		bool isMealExists = await mealRepository
+		bool isMealExists = await _mealRepository
 				.IsExistsAsync(m => m.Name == request.Name, cancellationToken: cancellationToken);
 
 		if (isMealExists)
 			return Result.Failure(MealErrors.DuplicatedMealName);
 
 		return Result.Success();
-	}
+	}	
 
-	private static Result ValidateMealOptionRequstOnAdd(IReadOnlyList<MealOptionRequest> options) 
+	private async Task<Result> ValidateMealOnUpdate(string mealId, MealRequest request, CancellationToken cancellationToken)
 	{
-		if (options.Count > 20)
-			return Result.Failure(MealOptionsErrors.InvalidMealOptionsCount);
-
-		if (options.Count != options.DistinctBy(opt => opt.Name).Count())
-			return Result.Failure(MealOptionsErrors.DuplicatedOptionName);
-
-		foreach (var option in options) 
-		{
-			var itemsValidationResult = ValidateMealOptionItemsRequestOnAdd(option.Items);
-
-			if (itemsValidationResult.IsFailure)
-				return itemsValidationResult;	
-		}
-
-		return Result.Success();
-	}
-
-	private static Result ValidateMealOptionItemsRequestOnAdd(IReadOnlyList<OptionItemRequest> items)
-	{
-		if (items is null || items.Count == 0 || items.Count > 10)
-			return Result.Failure(MealOptionsItemsErrors.InvalidMealOptionsItemsCount);
-
-		if ((items.Select(i => i.Name).Count() != items.DistinctBy(i => i.Name).Count()))
-			return Result.Failure(MealOptionsItemsErrors.DuplicatedItemName);
-
-		return Result.Success();
-	}
-
-	private async Task<Result> ValidateMealOnUpdate(string mealId, UpdateMealRequest request, CancellationToken cancellationToken)
-	{
-		if (request.HasOptions != (request.Options is not null && request.Options.Any()))
-			return Result.Failure(MealErrors.InvalidOptionGroupState);
-
-		bool isMealNameDuplicated = await mealRepository
+		bool isMealNameDuplicated = await _mealRepository
 			.IsExistsAsync(m => m.Name == request.Name && m.Id != mealId, cancellationToken: cancellationToken);
 
 		if (isMealNameDuplicated)

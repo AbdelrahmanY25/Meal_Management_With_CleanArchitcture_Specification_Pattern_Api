@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MealManagement.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260214163630_Change-Delete-Behaviour")]
-    partial class ChangeDeleteBehaviour
+    [Migration("20260414205847_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -34,6 +34,9 @@ namespace MealManagement.Infrastructure.Persistence.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<bool>("HasOptions")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(30)
@@ -45,16 +48,16 @@ namespace MealManagement.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Meals");
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Meals", "Menu");
                 });
 
-            modelBuilder.Entity("MealManagement.Domain.Entities.MealOptionGroup", b =>
+            modelBuilder.Entity("MealManagement.Domain.Entities.MealOption", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("DisplayOrder")
-                        .HasColumnType("int");
 
                     b.Property<string>("MealId")
                         .IsRequired()
@@ -67,20 +70,18 @@ namespace MealManagement.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("MealId");
+                    b.HasIndex("MealId", "Name")
+                        .IsUnique();
 
-                    b.ToTable("MealOptionGroups");
+                    b.ToTable("MealOptions", "Menu");
                 });
 
-            modelBuilder.Entity("MealManagement.Domain.Entities.OptionGroupItems", b =>
+            modelBuilder.Entity("MealManagement.Domain.Entities.MealOptionsItem", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<int>("DisplayOrder")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsPobular")
+                    b.Property<bool>("IsPopular")
                         .HasColumnType("bit");
 
                     b.Property<string>("Name")
@@ -88,7 +89,7 @@ namespace MealManagement.Infrastructure.Persistence.Migrations
                         .HasMaxLength(30)
                         .HasColumnType("nvarchar(30)");
 
-                    b.Property<string>("OptionGroupId")
+                    b.Property<string>("OptionId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
@@ -98,15 +99,16 @@ namespace MealManagement.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("OptionGroupId");
+                    b.HasIndex("OptionId", "Name")
+                        .IsUnique();
 
-                    b.ToTable("OptionGroupItems");
+                    b.ToTable("MealOptionsItems", "Menu");
                 });
 
-            modelBuilder.Entity("MealManagement.Domain.Entities.MealOptionGroup", b =>
+            modelBuilder.Entity("MealManagement.Domain.Entities.MealOption", b =>
                 {
                     b.HasOne("MealManagement.Domain.Entities.Meal", "Meal")
-                        .WithMany("MealOptionGroups")
+                        .WithMany("Options")
                         .HasForeignKey("MealId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -114,23 +116,23 @@ namespace MealManagement.Infrastructure.Persistence.Migrations
                     b.Navigation("Meal");
                 });
 
-            modelBuilder.Entity("MealManagement.Domain.Entities.OptionGroupItems", b =>
+            modelBuilder.Entity("MealManagement.Domain.Entities.MealOptionsItem", b =>
                 {
-                    b.HasOne("MealManagement.Domain.Entities.MealOptionGroup", "OptionGroup")
+                    b.HasOne("MealManagement.Domain.Entities.MealOption", "Option")
                         .WithMany("Items")
-                        .HasForeignKey("OptionGroupId")
+                        .HasForeignKey("OptionId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("OptionGroup");
+                    b.Navigation("Option");
                 });
 
             modelBuilder.Entity("MealManagement.Domain.Entities.Meal", b =>
                 {
-                    b.Navigation("MealOptionGroups");
+                    b.Navigation("Options");
                 });
 
-            modelBuilder.Entity("MealManagement.Domain.Entities.MealOptionGroup", b =>
+            modelBuilder.Entity("MealManagement.Domain.Entities.MealOption", b =>
                 {
                     b.Navigation("Items");
                 });

@@ -86,7 +86,7 @@ namespace MealManagement.Infrastructure.Persistence.Migrations
                         .HasMaxLength(30)
                         .HasColumnType("nvarchar(30)");
 
-                    b.Property<string>("OptionGroupId")
+                    b.Property<string>("OptionId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
@@ -96,7 +96,7 @@ namespace MealManagement.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("OptionGroupId", "Name")
+                    b.HasIndex("OptionId", "Name")
                         .IsUnique();
 
                     b.ToTable("MealOptionsItems", "Menu");
@@ -117,7 +117,7 @@ namespace MealManagement.Infrastructure.Persistence.Migrations
                 {
                     b.HasOne("MealManagement.Domain.Entities.MealOption", "Option")
                         .WithMany("Items")
-                        .HasForeignKey("OptionGroupId")
+                        .HasForeignKey("OptionId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 

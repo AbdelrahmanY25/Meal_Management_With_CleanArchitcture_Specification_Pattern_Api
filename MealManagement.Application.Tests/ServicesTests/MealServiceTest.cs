@@ -11,7 +11,7 @@ public class MealServiceTest
 
 		var sut = new MealService(mealRepository, mealOptionsService);
 
-		var request = new CreateMealRequest("Existing Meal", "Description", 10.0m, false, []);
+		var request = new MealRequest("Existing Meal", "Description", 10.0m, false, []);
 		
 		A.CallTo(() => mealRepository
 			.IsExistsAsync(A<Expression<Func<Meal, bool>>>.Ignored, A<bool>.Ignored, A<CancellationToken>.Ignored))
@@ -40,7 +40,7 @@ public class MealServiceTest
 
 		var sut = new MealService(mealRepository, mealOptionsService);
 
-		var request = new CreateMealRequest("Unique Meal", "Description", 10.0m, false, []);
+		var request = new MealRequest("Unique Meal", "Description", 10.0m, false, []);
 
 		A.CallTo(() => mealRepository
 			.IsExistsAsync(A<Expression<Func<Meal, bool>>>.Ignored, A<bool>.Ignored, A<CancellationToken>.Ignored))

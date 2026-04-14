@@ -8,7 +8,7 @@ internal class OptionGroupItemsConfigurations : IEntityTypeConfiguration<MealOpt
 
 		builder.HasOne(e => e.Option)
 			.WithMany(e => e.Items)
-			.HasForeignKey(e => e.OptionGroupId);
+			.HasForeignKey(e => e.OptionId);
 
 		builder.Property(e => e.Name)
 			.HasMaxLength(30);	
@@ -16,7 +16,7 @@ internal class OptionGroupItemsConfigurations : IEntityTypeConfiguration<MealOpt
 		builder.Property(e => e.Price)
 			.HasPrecision(5,2);
 
-		builder.HasIndex(e => new { e.OptionGroupId, e.Name })
+		builder.HasIndex(e => new { e.OptionId, e.Name })
 			.IsUnique();
 	}
 }

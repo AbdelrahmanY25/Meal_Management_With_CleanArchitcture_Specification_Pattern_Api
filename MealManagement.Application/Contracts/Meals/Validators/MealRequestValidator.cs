@@ -1,8 +1,8 @@
 ﻿namespace MealManagement.Application.Contracts.Meals.Validators;
 
-public class CreateMealValidator : AbstractValidator<CreateMealRequest>
+public class MealRequestValidator : AbstractValidator<MealRequest>
 {
-	public CreateMealValidator()
+	public MealRequestValidator()
 	{
 		RuleFor(x => x.Name)
 			.NotEmpty()

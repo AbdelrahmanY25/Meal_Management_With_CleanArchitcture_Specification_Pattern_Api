@@ -1,6 +1,6 @@
 ﻿namespace MealManagement.Application.Contracts.Meals.Requests;
 
-public sealed record CreateMealRequest
+public sealed record MealRequest
 (
 	string Name,
 	string Description,
